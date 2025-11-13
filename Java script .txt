@@ -1,0 +1,89 @@
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particlesArray = [];
+
+class Particle {
+  constructor(x, y){
+    this.x = x;
+    this.y = y;
+    this.size = Math.random() * 5 + 2;
+    this.speedX = (Math.random() - 0.5) * 5;
+    this.speedY = Math.random() * 3 + 1;
+    this.color = `hsl(${Math.random()*360}, 100%, 70%)`;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.size *= 0.95;
+  }
+  draw() {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function handleParticles(x, y) {
+  for(let i=0; i<30; i++){
+    particlesArray.push(new Particle(x, y));
+  }
+}
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  for(let i=0; i<particlesArray.length; i++){
+    particlesArray[i].update();
+    particlesArray[i].draw();
+    if(particlesArray[i].size < 0.5){
+      particlesArray.splice(i,1);
+      i--;
+    }
+  }
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Função para apagar velas
+function apagarVelas() {
+  document.querySelectorAll('.candle').forEach(c => {
+    c.style.background = 'transparent';
+    c.style.animation = 'none';
+  });
+  document.querySelectorAll('.candle::after').forEach(c => {
+    c.style.background = 'transparent';
+    c.style.boxShadow = 'none';
+  });
+}
+
+// Detectar sopro
+navigator.mediaDevices.getUserMedia({ audio: true })
+  .then(stream => {
+    const audioContext = new AudioContext();
+    const analyser = audioContext.createAnalyser();
+    const microphone = audioContext.createMediaStreamSource(stream);
+    microphone.connect(analyser);
+    analyser.fftSize = 512;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function detectBlow() {
+      analyser.getByteTimeDomainData(dataArray);
+      let sum = dataArray.reduce((a,b) => a+b,0)/dataArray.length;
+      if(sum > 120){
+        apagarVelas();
+        handleParticles(canvas.width/2, canvas.height/2);
+      }
+      requestAnimationFrame(detectBlow);
+    }
+    detectBlow();
+  })
+  .catch(err => console.log('Microfone não permitido', err));
+
+// Clique para testar sem sopro
+canvas.addEventListener('click', () => {
+  apagarVelas();
+  handleParticles(canvas.width/2, canvas.height/2);
+});

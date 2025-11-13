@@ -1,0 +1,63 @@
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #2b2b2b;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+#cake-container {
+  position: relative;
+  z-index: 2;
+}
+
+#cake {
+  width: 250px;
+  height: 150px;
+  background: #f4a261;
+  border-radius: 15px;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Velas */
+.candle {
+  width: 12px;
+  height: 50px;
+  background: #ffe066;
+  position: absolute;
+  top: -50px;
+  border-radius: 3px;
+  animation: flicker 1s infinite;
+}
+
+#candle1 { left: 50px; }
+#candle2 { left: 110px; }
+#candle3 { left: 170px; }
+
+.candle::after {
+  content: '';
+  width: 8px;
+  height: 18px;
+  background: orange;
+  position: absolute;
+  top: -18px;
+  left: 2px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 3px yellow;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50% { opacity: 0.7; transform: translateY(-2px); }
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
